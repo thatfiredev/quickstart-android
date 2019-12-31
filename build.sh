@@ -33,8 +33,9 @@ cp mock-google-services.json mlkit-translate/app/google-services.json
 cp mock-google-services.json storage/app/google-services.json
 
 # Install preview deps
-${ANDROID_HOME}/tools/bin/sdkmanager --channel=3 \
-  "tools" "platform-tools" "build-tools;26.0.0-rc2" "platforms;android-26"
+# TODO: Uncomment this once we're done
+# ${ANDROID_HOME}/tools/bin/sdkmanager --channel=3 \
+#   "tools" "platform-tools" "build-tools;26.0.0-rc2" "platforms;android-26"
 
 # Build
 if [ $TRAVIS_PULL_REQUEST = false ] ; then
@@ -44,5 +45,25 @@ if [ $TRAVIS_PULL_REQUEST = false ] ; then
 else
   # On a pull request, just build debug which is much faster and catches
   # obvious errors.
-  ./gradlew clean ktlint assembleDebug check
+  # ./gradlew clean ktlint assembleDebug check
+  dest=$TRAVIS_BRANCH
+  branch=$TRAVIS_PULL_REQUEST_BRANCH
+  # TODO: Delete the lines below once we're done
+  echo "destination= $dest"
+  echo "origin= $branch"
+
+  changed_modules=""
+
+  git diff --name-only $dest..$branch | { while read line
+      do
+        module_name=${line%%/*}
+
+        if [[ ${module_name} != "buildSrc" &&
+              ${changed_modules} != *"$module_name"* ]]; then
+                changed_modules="${test_modules} ${module_name}"
+        fi
+      done
+  }
+
+  echo "changed modules: $changed_modules"
 fi
