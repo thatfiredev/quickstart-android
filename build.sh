@@ -33,9 +33,8 @@ cp mock-google-services.json mlkit-translate/app/google-services.json
 cp mock-google-services.json storage/app/google-services.json
 
 # Install preview deps
-# TODO: Uncomment this once we're done
-# ${ANDROID_HOME}/tools/bin/sdkmanager --channel=3 \
-#   "tools" "platform-tools" "build-tools;26.0.0-rc2" "platforms;android-26"
+${ANDROID_HOME}/tools/bin/sdkmanager --channel=3 \
+  "tools" "platform-tools" "build-tools;26.0.0-rc2" "platforms;android-26"
 
 # Build
 if [ $TRAVIS_PULL_REQUEST = false ] ; then
@@ -46,9 +45,6 @@ else
   # On a pull request, just build debug which is much faster and catches
   # obvious errors.
 
-  # Run ktlint in the whole project first
-  ./gradlew ktlint
-
   dest="origin/$TRAVIS_BRANCH"
   branch="HEAD"
 
@@ -57,7 +53,7 @@ else
   echo "origin= $branch"
 
   # The build commands to execute
-  build_commands=""
+  build_commands="./gradlew ktlint"
 
   # Look for available tasks
   echo "Looking for available tasks"
@@ -77,7 +73,6 @@ else
         fi
       done
       echo "build_commands: ${build_commands}"
-      build_commands="./gradlew${build_commands}"
       eval $build_commands
   }
 
