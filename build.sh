@@ -45,7 +45,7 @@ else
   # On a pull request, just build debug which is much faster and catches
   # obvious errors.
 
-  dest="origin/$TRAVIS_BRANCH"
+  dest="$TRAVIS_BRANCH"
   branch="HEAD"
 
   # TODO: Delete the lines below once we're done
@@ -58,6 +58,9 @@ else
   # Look for available tasks
   echo "Looking for available tasks"
   AVAILABLE_TASKS=$(./gradlew tasks --all)
+
+  echo "Running git branch"
+  git branch
 
   echo "Running git diff"
   git diff --name-only $dest..$branch -- | { while read line
