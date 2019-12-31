@@ -70,21 +70,17 @@ else
   git diff --name-only $dest..$branch -- | { while read line
       do
         module_name=${line%%/*}
-        echo "current module name: $module_name"
+        # echo "current module name: $module_name"
 
-        if [[ $AVAILABLE_TASKS =~ $module_name":"* ]]; then
-            build_commands="$build_commands $module_name:app:assembleDebug"
-        fi
-
-        if [[ ${module_name} != "buildSrc" &&
-              ${changed_modules} != *"$module_name"* ]]; then
-                changed_modules="${test_modules} ${module_name}"
+        if [[ $AVAILABLE_TASKS =~ "${module_name}:" && ${build_commands} != *"$module_name"* ]]; then
+            echo "adding command for ${module_name}:"
+            build_commands="${build_commands} ${module_name}:app:clean"
+            build_commands="${build_commands} ${module_name}:app:assembleDebug"
+            build_commands="${build_commands} ${module_name}:app:check"
         fi
       done
+      echo "build_commands: ${build_commands}"
+      # eval build_commands
   }
 
-  echo "changed modules: $changed_modules"
-  echo "build_commands: $build_commands"
-
-  # eval build_commands
 fi
