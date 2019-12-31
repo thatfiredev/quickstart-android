@@ -44,5 +44,36 @@ if [ $TRAVIS_PULL_REQUEST = false ] ; then
 else
   # On a pull request, just build debug which is much faster and catches
   # obvious errors.
-  ./gradlew clean ktlint assembleDebug check
+
+  dest="origin/$TRAVIS_BRANCH"
+  branch="HEAD"
+
+  # TODO: Delete the lines below once we're done
+  echo "destination= $dest"
+  echo "origin= $branch"
+
+  # The build commands to execute
+  build_commands="./gradlew ktlint"
+
+  # Look for available tasks
+  echo "Looking for available tasks"
+  AVAILABLE_TASKS=$(./gradlew tasks --all)
+
+  echo "Running git diff"
+  git diff --name-only $dest..$branch -- | { while read line
+      do
+        module_name=${line%%/*}
+        # echo "current module name: $module_name"
+
+        if [[ $AVAILABLE_TASKS =~ "${module_name}:" && ${build_commands} != *"$module_name"* ]]; then
+            echo "adding command for ${module_name}:"
+            build_commands="${build_commands} ${module_name}:app:clean"
+            build_commands="${build_commands} ${module_name}:app:assembleDebug"
+            build_commands="${build_commands} ${module_name}:app:check"
+        fi
+      done
+      echo "build_commands: ${build_commands}"
+      eval $build_commands
+  }
+
 fi
