@@ -12,7 +12,7 @@ buildscript {
         classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.61'
     }
 }
-
+// TODO: Remove this once we're done with conditional builds
 allprojects {
     repositories {
         //mavenLocal() must be listed at the top to facilitate testing

@@ -46,17 +46,35 @@ else
   # On a pull request, just build debug which is much faster and catches
   # obvious errors.
   # ./gradlew clean ktlint assembleDebug check
-  dest=$TRAVIS_BRANCH
-  branch=$TRAVIS_PULL_REQUEST_BRANCH
+  # On modules it becomes:
+  # ./gradlew functions:app:clean functions:app:assembleDebug functions:app:check
+  # TODO: Run ktlint in the whole project first
+  # ./gradlew ktlint
+  dest="origin/$TRAVIS_BRANCH"
+  branch="HEAD"
+  # branch="origin/$TRAVIS_PULL_REQUEST_BRANCH"
   # TODO: Delete the lines below once we're done
   echo "destination= $dest"
   echo "origin= $branch"
 
   changed_modules=""
 
-  git diff --name-only $dest..$branch | { while read line
+  # The build commands to execute
+  build_commands=""
+
+  # Look for available tasks
+  echo "Looking for available tasks"
+  AVAILABLE_TASKS=$(./gradlew tasks --all)
+
+  echo "Running git diff"
+  git diff --name-only $dest..$branch -- | { while read line
       do
         module_name=${line%%/*}
+        echo "current module name: $module_name"
+
+        if [[ $AVAILABLE_TASKS =~ $module_name":"* ]]; then
+            build_commands="$build_commands $module_name:app:assembleDebug"
+        fi
 
         if [[ ${module_name} != "buildSrc" &&
               ${changed_modules} != *"$module_name"* ]]; then
@@ -66,4 +84,7 @@ else
   }
 
   echo "changed modules: $changed_modules"
+  echo "build_commands: $build_commands"
+
+  # eval build_commands
 fi
