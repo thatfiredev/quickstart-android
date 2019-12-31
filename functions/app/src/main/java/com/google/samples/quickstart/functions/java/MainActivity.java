@@ -56,6 +56,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private static final int RC_SIGN_IN = 9001;
 
+    // Testing the functions selective build
+
     // Add number views
     private EditText mFirstNumberField;
     private EditText mSecondNumberField;
