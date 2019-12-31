@@ -45,8 +45,14 @@ else
   # On a pull request, just build debug which is much faster and catches
   # obvious errors.
 
-  dest="$TRAVIS_BRANCH"
-  branch="HEAD"
+  dest="origin/$TRAVIS_BRANCH"
+  branch="origin/$TRAVIS_PULL_REQUEST_BRANCH"
+
+  git fetch --all
+
+  git checkout $dest
+
+  git checkout $branch
 
   # TODO: Delete the lines below once we're done
   echo "destination= $dest"
