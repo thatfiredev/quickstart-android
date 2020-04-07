@@ -31,6 +31,10 @@ changed_modules=""
 echo "HEAD ENV ${GITHUB_HEAD_REF}"
 echo "BASE ENV ${GITHUB_BASE_REF}"
 
+# unshallow since GitHub actions does a shallow clone
+git fetch --unshallow
+git fetch origin
+
 # Check which modules were changed
 echo "git remote:"
 git remote
