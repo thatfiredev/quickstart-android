@@ -42,7 +42,7 @@ git diff --name-only | { while read line
 build_commands=""
 for module in $changed_modules
 do
-  if [[ $AVAILABLE_TASKS =~ $module":app:" ]]; then
+  if [[ $AVAILABLE_TASKS =~ "${module}:app:" ]]; then
     build_commands="${build_commands} :${module}:app:assembleDebug :${module}:app:check"
     echo "Building debug for ${module}"
   fi
