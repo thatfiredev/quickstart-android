@@ -40,7 +40,6 @@ while read line; do
   module_name=${line%%/*}
   if [[ ${MODULES} != *"${module_name}"* ]]; then
     MODULES="${MODULES} ${module_name}"
-    echo "adding ${module_name}"
   fi
 done < <(git diff --name-only origin/$GITHUB_BASE_REF..origin/$GITHUB_HEAD_REF)
 
@@ -49,11 +48,8 @@ changed_modules=$MODULES
 build_commands=""
 for module in $changed_modules
 do
-  echo "Changed module:"
-  echo $module
   if [[ $AVAILABLE_TASKS =~ $module":app:" ]]; then
     build_commands=${build_commands}" :"${module}":app:assembleDebug :"${module}":app:check"
-    echo "Building debug for ${module}"
   fi
 done
 
