@@ -44,6 +44,7 @@ for module in $changed_modules
 do
   if [[ $AVAILABLE_TASKS =~ $module":app:" ]]; then
     build_commands="${build_commands} :${module}:app:assembleDebug :${module}:app:check"
+    echo "Building debug for ${module}"
   fi
 done
 
@@ -51,6 +52,7 @@ if [[ $build_commands == "" ]]; then
   # The changes were made in directories with no gradle tasks
   # Let's build debug, just in case
   build_commands=" assembleDebug check"
+  echo "No gradle tasks were found. Building debug..."
 fi
 
 # Build
