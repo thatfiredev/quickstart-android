@@ -7,9 +7,7 @@ set -e
 git fetch --unshallow
 git fetch origin
 
-echo "HEAD branch: ${GITHUB_HEAD_REF}"
 echo "BASE branch: ${GITHUB_BASE_REF}"
-echo "Repo: ${GITHUB_REPOSITORY}"
 
 # Get all the modules that were changed
 while read line; do
@@ -17,7 +15,7 @@ while read line; do
   if [[ ${MODULES} != *"${module_name}"* ]]; then
     MODULES="${MODULES} ${module_name}"
   fi
-done < <(git diff --name-only origin/$GITHUB_BASE_REF..origin/$GITHUB_HEAD_REF)
+done < <(git diff --name-only origin/$GITHUB_BASE_REF)
 changed_modules=$MODULES
 
 # Get a list of all available gradle tasks
