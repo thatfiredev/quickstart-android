@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity(),
         FilterDialogFragment.FilterListener,
         RestaurantAdapter.OnRestaurantSelectedListener {
 
-    lateinit var firestore: FirebaseFirestore
+    private lateinit var firestore: FirebaseFirestore
     lateinit var query: Query
 
     private lateinit var filterDialog: FilterDialogFragment
