@@ -62,7 +62,7 @@ do
   echo "Changed module:"
   echo $module
   if [[ $AVAILABLE_TASKS =~ $module":app:" ]]; then
-    build_commands=${build_commands} " :"${module}":app:assembleDebug :"${module}":app:check"
+    build_commands=${build_commands}" :"${module}":app:assembleDebug :"${module}":app:check"
     echo "Building debug for ${module}"
   fi
 done
