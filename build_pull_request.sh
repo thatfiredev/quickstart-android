@@ -25,14 +25,20 @@ cp mock-google-services.json mlkit-translate/app/google-services.json
 cp mock-google-services.json storage/app/google-services.json
 
 
+dest=$github.base_ref
+branch=$github.head_ref
+
+echo "Destination ${dest}"
+echo "Head ${branch}"
+
 AVAILABLE_TASKS=$(./gradlew tasks --all)
 changed_modules=""
 
 # Check which modules were changed
-git diff --name-only | { while read line
+git diff --name-only $dest..$branch | { while read line
   do
     module_name=${line%%/*}
-    if [[ ${changed_modules} != *"$module_name"* ]]; then
+    if [[ ${changed_modules} != *"${module_name}"* ]]; then
       changed_modules="${changed_modules} ${module_name}"
     fi
   done
