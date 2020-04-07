@@ -48,7 +48,7 @@ git diff --name-only origin/$GITHUB_BASE_REF..origin/$GITHUB_HEAD_REF | { while 
   do
     module_name=${line%%/*}
     if [[ ${changed_modules} != *"${module_name}"* ]]; then
-      changed_modules="${changed_modules}${module_name} "
+      changed_modules+="${module_name} "
       echo "adding ${module_name}"
     fi
   done
