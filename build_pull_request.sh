@@ -7,7 +7,6 @@ set -e
 git fetch --unshallow
 git fetch origin
 
-
 echo "HEAD branch: ${GITHUB_HEAD_REF}"
 echo "BASE branch: ${GITHUB_BASE_REF}"
 echo "Repo: ${GITHUB_REPOSITORY}"
