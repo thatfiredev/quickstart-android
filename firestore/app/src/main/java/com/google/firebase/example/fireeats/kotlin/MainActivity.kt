@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity(),
     private lateinit var query: Query
 
     private lateinit var filterDialog: FilterDialogFragment
-    lateinit var adapter: RestaurantAdapter
+    private lateinit var adapter: RestaurantAdapter
 
     private lateinit var viewModel: MainActivityViewModel
 
