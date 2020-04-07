@@ -32,7 +32,7 @@ AVAILABLE_TASKS=$(./gradlew tasks --all)
 changed_modules=""
 
 # Check which modules were changed
-git diff --name-only $DEST..$HEAD | { while read line
+git diff --name-only origin/$DEST..$HEAD | { while read line
   do
     module_name=${line%%/*}
     if [[ ${changed_modules} != *"${module_name}"* ]]; then
