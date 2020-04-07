@@ -49,12 +49,10 @@ git diff --name-only origin/$GITHUB_BASE_REF..origin/$GITHUB_HEAD_REF | { while 
     module_name=${line%%/*}
     if [[ ${changed_modules} != *"${module_name}"* ]]; then
       changed_modules="${changed_modules} ${module_name}"
+      echo "adding ${module_name}"
     fi
   done
 }
-
-echo "AVAILABLE_TASKS"
-echo $AVAILABLE_TASKS
 
 # Check if these modules have gradle tasks
 build_commands=""
@@ -75,5 +73,5 @@ done
 #fi
 
 # Build
-echo "Building Pull Request..."
-eval "./gradlew clean ktlint ${build_commands}"
+#echo "Building Pull Request..."
+#eval "./gradlew clean ktlint ${build_commands}"
