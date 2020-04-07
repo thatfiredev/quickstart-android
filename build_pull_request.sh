@@ -56,11 +56,11 @@ git diff --name-only origin/$GITHUB_BASE_REF..origin/$GITHUB_HEAD_REF | { while 
 
 # Check if these modules have gradle tasks
 build_commands=""
-modules_array=($changed_modules)
-for module in "${modules_array[@]}"
+for module in $changed_modules
 do
-  echo "Changed module: ${module}"
-  if [[ $AVAILABLE_TASKS =~ "${module}:app:" ]]; then
+  echo "Changed module:"
+  echo $module
+  if [[ $AVAILABLE_TASKS =~ $module":app:" ]]; then
     build_commands="${build_commands} :${module}:app:assembleDebug :${module}:app:check"
     echo "Building debug for ${module}"
   fi
