@@ -26,7 +26,6 @@ cp mock-google-services.json storage/app/google-services.json
 
 
 AVAILABLE_TASKS=$(./gradlew tasks --all)
-changed_modules=""
 
 echo "HEAD ENV ${GITHUB_HEAD_REF}"
 echo "BASE ENV ${GITHUB_BASE_REF}"
@@ -44,6 +43,7 @@ git branch
 
 echo "Repo: ${GITHUB_REPOSITORY}"
 
+changed_modules=""
 git diff --name-only origin/$GITHUB_BASE_REF..origin/$GITHUB_HEAD_REF | { while read line
   do
     module_name=${line%%/*}
@@ -55,6 +55,7 @@ git diff --name-only origin/$GITHUB_BASE_REF..origin/$GITHUB_HEAD_REF | { while 
 }
 
 echo "Modules:${changed_modules}"
+echo $changed_modules
 # Check if these modules have gradle tasks
 build_commands=""
 for module in $changed_modules
