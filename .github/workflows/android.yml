@@ -18,9 +18,6 @@ jobs:
     - name: Check Snippets
       run: python scripts/checksnippets.py
     - name: Build with Gradle (Pull Request)
-      env:
-        DEST: ${{ github.base_ref }}
-        HEAD: ${{ github.head_ref }}
       run: ./build_pull_request.sh
       if: github.event_name == 'pull_request'
     - name: Build with Gradle (Push)
