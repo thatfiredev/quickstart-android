@@ -20,6 +20,6 @@ jobs:
     - name: Build with Gradle (Pull Request)
       run: ./build_pull_request.sh
       if: github.event_name == 'pull_request'
-    - name: Build with Gradle (Push)
-      run: ./build.sh
-      if: github.event_name != 'pull_request'
+#    - name: Build with Gradle (Push)
+#      run: ./build.sh
+#      if: github.event_name != 'pull_request'
