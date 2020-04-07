@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity(),
         RestaurantAdapter.OnRestaurantSelectedListener {
 
     private lateinit var firestore: FirebaseFirestore
-    lateinit var query: Query
+    private lateinit var query: Query
 
     private lateinit var filterDialog: FilterDialogFragment
     lateinit var adapter: RestaurantAdapter
