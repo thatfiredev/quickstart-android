@@ -38,25 +38,27 @@ git diff --name-only | { while read line
   done
 }
 
+echo "AVAILABLE_TASKS"
+echo $AVAILABLE_TASKS
+
 # Check if these modules have gradle tasks
 build_commands=""
 for module in $changed_modules
 do
+  echo "Changed module: ${module}"
   if [[ $AVAILABLE_TASKS =~ "${module}:app:" ]]; then
     build_commands="${build_commands} :${module}:app:assembleDebug :${module}:app:check"
     echo "Building debug for ${module}"
   fi
 done
 
-if [[ $build_commands == "" ]]; then
-  # The changes were made in directories with no gradle tasks
-  # Let's build debug, just in case
-  build_commands=" assembleDebug check"
-  echo "No gradle tasks were found. Building debug..."
-fi
+#if [[ $build_commands == "" ]]; then
+#  # The changes were made in directories with no gradle tasks
+#  # Let's build debug, just in case
+#  build_commands=" assembleDebug check"
+#  echo "No gradle tasks were found. Building debug..."
+#fi
 
 # Build
 echo "Building Pull Request..."
-# On a pull request, just build debug which is much faster and catches
-# obvious errors.
 eval "./gradlew clean ktlint ${build_commands}"
