@@ -43,16 +43,19 @@ git branch
 
 echo "Repo: ${GITHUB_REPOSITORY}"
 
-changed_modules=""
 git diff --name-only origin/$GITHUB_BASE_REF..origin/$GITHUB_HEAD_REF | { while read line
+  changed_modules=""
   do
     module_name=${line%%/*}
     if [[ ${changed_modules} != *"${module_name}"* ]]; then
-      changed_modules+="${module_name} "
+      changed_modules="${changed_modules} ${module_name}"
       echo "adding ${module_name}"
     fi
   done
+  export MODULES=$changed_modules
 }
+
+changed_modules=$MODULES
 
 echo "Modules:${changed_modules}"
 echo $changed_modules
