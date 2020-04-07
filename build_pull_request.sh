@@ -32,7 +32,11 @@ echo "HEAD ENV ${GITHUB_HEAD_REF}"
 echo "BASE ENV ${GITHUB_BASE_REF}"
 
 # Check which modules were changed
+echo "git remote:"
 git remote
+
+echo "git branch:"
+git branch
 
 echo "Repo: ${GITHUB_REPOSITORY}"
 
