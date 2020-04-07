@@ -50,12 +50,11 @@ done
 if [[ $build_commands == "" ]]; then
   # The changes were made in directories with no gradle tasks
   # Let's build debug, just in case
-  build_commands="assembleDebug check"
+  build_commands=" assembleDebug check"
 fi
 
 # Build
 echo "Building Pull Request..."
 # On a pull request, just build debug which is much faster and catches
 # obvious errors.
-./gradlew clean ktlint
-eval $build_commands
+eval "./gradlew clean ktlint ${build_commands}"
