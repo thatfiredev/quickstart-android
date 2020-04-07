@@ -25,5 +25,7 @@ cp mock-google-services.json mlkit-translate/app/google-services.json
 cp mock-google-services.json storage/app/google-services.json
 
 # Build
-echo "Building Push..."
-./gradlew clean ktlint build
+echo "Building Pull Request..."
+# On a pull request, just build debug which is much faster and catches
+# obvious errors.
+./gradlew clean ktlint assembleDebug check
