@@ -34,13 +34,6 @@ echo "BASE ENV ${GITHUB_BASE_REF}"
 git fetch --unshallow
 git fetch origin
 
-# Check which modules were changed
-echo "git remote:"
-git remote
-
-echo "git branch:"
-git branch
-
 echo "Repo: ${GITHUB_REPOSITORY}"
 
 while read line; do
@@ -51,11 +44,8 @@ while read line; do
   fi
 done < <(git diff --name-only origin/$GITHUB_BASE_REF..origin/$GITHUB_HEAD_REF)
 
-changed_modules=$MODULES
-
-echo "Modules:${changed_modules}"
-echo $changed_modules
 # Check if these modules have gradle tasks
+changed_modules=$MODULES
 build_commands=""
 for module in $changed_modules
 do
@@ -67,13 +57,7 @@ do
   fi
 done
 
-#if [[ $build_commands == "" ]]; then
-#  # The changes were made in directories with no gradle tasks
-#  # Let's build debug, just in case
-#  build_commands=" assembleDebug check"
-#  echo "No gradle tasks were found. Building debug..."
-#fi
-
 # Build
-#echo "Building Pull Request..."
-#eval "./gradlew clean ktlint ${build_commands}"
+echo "Building Pull Request with"
+echo $build_commands
+eval "./gradlew clean ktlint ${build_commands}"
