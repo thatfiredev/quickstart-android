@@ -31,8 +31,15 @@ echo "Head ${HEAD}"
 AVAILABLE_TASKS=$(./gradlew tasks --all)
 changed_modules=""
 
+echo "HEAD ENV ${GITHUB_HEAD_REF}"
+echo "BASE ENV ${GITHUB_BASE_REF}"
+
 # Check which modules were changed
-git diff --name-only origin/$DEST..$HEAD | { while read line
+git remote
+
+echo "Repo: ${GITHUB_REPOSITORY}"
+
+git diff --name-only $DEST..$HEAD | { while read line
   do
     module_name=${line%%/*}
     if [[ ${changed_modules} != *"${module_name}"* ]]; then
