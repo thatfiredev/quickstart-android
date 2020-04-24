@@ -1,6 +1,5 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 check.dependsOn 'assembleDebugAndroidTest'
 
 android {
@@ -27,6 +26,10 @@ android {
     packagingOptions {
         exclude 'LICENSE.txt'
     }
+
+    viewBinding {
+        enabled = true
+    }
 }
 
 dependencies {
@@ -37,12 +40,12 @@ dependencies {
     implementation 'androidx.browser:browser:1.0.0'
 
     // [START gradle_play_config]
-    implementation 'com.google.android.gms:play-services-ads:19.0.1'
+    implementation 'com.google.android.gms:play-services-ads:19.1.0'
     // [END gradle_play_config]
 
     // For an optimal experience using AdMob, add the Firebase SDK
     // for Google Analytics. This is recommended, but not required.
-    implementation 'com.google.firebase:firebase-analytics:17.2.3'
+    implementation 'com.google.firebase:firebase-analytics:17.3.0'
 
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     androidTestImplementation 'androidx.test:rules:1.2.0'

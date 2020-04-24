@@ -24,7 +24,6 @@ import com.google.firebase.quickstart.database.R
 import com.google.firebase.quickstart.database.kotlin.PostDetailActivity
 import com.google.firebase.quickstart.database.kotlin.models.Post
 import com.google.firebase.quickstart.database.kotlin.viewholder.PostViewHolder
-import kotlinx.android.synthetic.main.fragment_all_posts.view.messagesList
 
 abstract class PostListFragment : Fragment() {
 
@@ -52,7 +51,7 @@ abstract class PostListFragment : Fragment() {
         // [END create_database_reference]
 
         recycler = rootView.findViewById(R.id.messagesList)
-        rootView.messagesList.setHasFixedSize(true)
+        recycler.setHasFixedSize(true)
 
         return rootView
     }
@@ -134,8 +133,8 @@ abstract class PostListFragment : Fragment() {
 
             override fun onComplete(
                 databaseError: DatabaseError?,
-                b: Boolean,
-                dataSnapshot: DataSnapshot?
+                committed: Boolean,
+                currentData: DataSnapshot?
             ) {
                 // Transaction completed
                 Log.d(TAG, "postTransaction:onComplete:" + databaseError!!)

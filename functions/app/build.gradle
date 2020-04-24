@@ -1,6 +1,5 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 
 android {
     // Changes the test build type for instrumented tests to "stage".
@@ -24,6 +23,10 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+
+    viewBinding {
+        enabled = true
+    }
 }
 
 dependencies {
@@ -41,10 +44,10 @@ dependencies {
     implementation 'com.google.firebase:firebase-functions-ktx:19.0.2'
 
     implementation 'com.google.firebase:firebase-auth:19.3.0'
-    implementation 'com.google.firebase:firebase-messaging:20.1.3'
+    implementation 'com.google.firebase:firebase-messaging:20.1.5'
 
     implementation 'com.firebaseui:firebase-ui-auth:6.2.1'
-    implementation 'com.google.android.gms:play-services-auth:17.0.0'
+    implementation 'com.google.android.gms:play-services-auth:18.0.0'
 
     testImplementation 'junit:junit:4.13'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
