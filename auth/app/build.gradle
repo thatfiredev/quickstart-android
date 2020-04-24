@@ -5,7 +5,6 @@ check.dependsOn 'assembleDebugAndroidTest'
 android {
     compileSdkVersion 29
     flavorDimensions "minSdkVersion"
-
     defaultConfig {
         applicationId "com.google.firebase.quickstart.auth"
         minSdkVersion 16
