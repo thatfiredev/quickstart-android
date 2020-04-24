@@ -26,7 +26,6 @@ android {
         enabled = true
     }
 }
-
 dependencies {
     implementation project(':internal:chooserx')
     implementation project(":internal:lintchecks")
