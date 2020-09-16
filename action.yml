@@ -11,7 +11,7 @@ inputs:
     default: 'build'
 runs:
   using: 'node12'
-  image: 'index.js'
+  main: 'index.js'
   args:
     - ${{ inputs.for-all-modules }}
     - ${{ inputs.for-each-module }}
