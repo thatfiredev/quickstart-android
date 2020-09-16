@@ -10,7 +10,8 @@ inputs:
     required: true
     default: 'build'
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
+  using: 'node12'
+  image: 'index.js'
   args:
+    - ${{ inputs.for-all-modules }}
     - ${{ inputs.for-each-module }}
