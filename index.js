@@ -1,3 +1,4 @@
 const shell = require('shelljs')
 
-shell.exec('./entrypoint.sh')
+// TODO: get the inputs and pass them to the script
+shell.exec('./entrypoint.sh assembleDebug clean')
