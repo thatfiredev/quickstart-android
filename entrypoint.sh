@@ -1,22 +1,11 @@
 #!/bin/bash
 
 # Exit on error
-#set -e
+set -e
 
 # unshallow since GitHub actions does a shallow clone
 git fetch --unshallow
 git fetch origin
-
-# Checking the output of git remote
-
-echo "base: $GITHUB_BASE_REF"
-echo "ref: $GITHUB_REF"
-
-echo "Running git remote"
-git remote
-
-echo "Running git branch"
-git branch
 
 # Get all the modules that were changed
 while read line; do

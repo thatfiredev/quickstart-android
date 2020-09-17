@@ -1,4 +1,7 @@
 const shell = require('shelljs')
+const core = require('@actions/core');
 
-// TODO: get the inputs and pass them to the script
-shell.exec('./entrypoint.sh assembleDebug clean')
+let forAllModules = core.getInput('for-all-modules');
+let forEachModule = core.getInput('for-each-module');
+
+shell.exec('./entrypoint.sh ' + forEachModule + ' ' + forAllModules)
