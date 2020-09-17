@@ -12,8 +12,26 @@ shell.exec('git fetch origin');
 // Get all changed modules
 
 const baseBranch = 'origin/' + process.env.GITHUB_BASE_REF;
-shell.exec('git diff --name-only ' + baseBranch, function (code, stdout, stderr) {
-    console.log('Exit code:', code);
-    console.log('Std Out:', stdout);
-    console.log('Std Error:', stderr);
+
+let changed_modules = [];
+shell.exec('git diff --name-only ' + baseBranch, {silent:true}, function (code, stdout, stderr) {
+    let changedFiles = stdout.split(/\r?\n/);
+    changedFiles.forEach(function(fileName) {
+        let moduleName = fileName.split('/')[0];
+        if (!changed_modules.includes(moduleName)) {
+            changed_modules.push(moduleName);
+        }
+    });
+
+    let availableTasks = shell.exec('./gradlew tasks --all', {silent:true}).stdout;
+
+    let buildCommands = "";
+    changed_modules.forEach(function (module) {
+        if (availableTasks.includes(module + ':app:')) {
+            buildCommands += " :" + module + ":app:" + forEachModule + " :" + module + ":app:check";
+        }
+    });
+
+    console.log('Build Pull Request with:', buildCommands);
+    shell.exec('./gradlew ' + forAllModules + ' ' + buildCommands);
 });
