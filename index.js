@@ -28,7 +28,10 @@ shell.exec('git diff --name-only ' + baseBranch, {silent:true}, function (code, 
     let buildCommands = "";
     changed_modules.forEach(function (module) {
         if (availableTasks.includes(module + ':app:')) {
-            buildCommands += " :" + module + ":app:" + forEachModule + " :" + module + ":app:check";
+            if (module != '') {
+                buildCommands += " :" + module + ":app:" + forEachModule +
+                    " :" + module + ":app:check";
+            }
         }
     });
 
