@@ -6,11 +6,13 @@ import com.google.android.material.snackbar.Snackbar
 import android.text.TextUtils
 import android.util.Log
 import android.view.View
-import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthActionCodeException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.ktx.actionCodeSettings
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.quickstart.auth.R
 import com.google.firebase.quickstart.auth.databinding.ActivityPasswordlessBinding
 
@@ -32,7 +34,7 @@ class PasswordlessActivity : BaseActivity(), View.OnClickListener {
         setProgressBar(binding.progressBar)
 
         // Initialize Firebase Auth
-        auth = FirebaseAuth.getInstance()
+        auth = Firebase.auth
 
         binding.passwordlessSendEmailButton.setOnClickListener(this)
         binding.passwordlessSignInButton.setOnClickListener(this)
@@ -87,7 +89,7 @@ class PasswordlessActivity : BaseActivity(), View.OnClickListener {
      */
     private fun intentHasEmailLink(intent: Intent?): Boolean {
         if (intent != null && intent.data != null) {
-            val intentData = intent.data!!.toString()
+            val intentData = intent.data.toString()
             if (auth.isSignInWithEmailLink(intentData)) {
                 return true
             }
@@ -100,13 +102,13 @@ class PasswordlessActivity : BaseActivity(), View.OnClickListener {
      * Send an email sign-in link to the specified email.
      */
     private fun sendSignInLink(email: String) {
-        val settings = ActionCodeSettings.newBuilder()
-                .setAndroidPackageName(
-                        packageName,
-                        false, null/* minimum app version */)/* install if not available? */
-                .setHandleCodeInApp(true)
-                .setUrl("https://kotlin.auth.example.com/emailSignInLink")
-                .build()
+        val settings = actionCodeSettings {
+            setAndroidPackageName(
+                    packageName,
+                    false, null/* minimum app version */)/* install if not available? */
+            handleCodeInApp = true
+            url = "https://kotlin.auth.example.com/emailSignInLink"
+        }
 
         hideKeyboard(binding.fieldEmail)
         showProgressBar()

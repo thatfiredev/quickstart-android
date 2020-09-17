@@ -2,7 +2,6 @@ name: Android CI
 
 on:
   - pull_request
-  - push
 
 jobs:
   build:
@@ -12,16 +11,13 @@ jobs:
     - name: set up JDK 1.8
       uses: actions/setup-java@v1
       with:
-        java-version: 1.8 
-    - name: Install NDK
-      run: echo "y" | sudo ${ANDROID_HOME}/tools/bin/sdkmanager --install "ndk;20.0.5594570" --sdk_root=${ANDROID_SDK_ROOT}
-    - name: Check Snippets
-      run: python scripts/checksnippets.py
+        java-version: 1.8
+#    - name: Install NDK
+#      run: echo "y" | sudo ${ANDROID_HOME}/tools/bin/sdkmanager --install "ndk;21.0.6113669" --sdk_root=${ANDROID_SDK_ROOT}
     - name: Copy mock google_services.json
       run: ./copy_mock_google_services_json.sh
-    - name: Build with Gradle (Pull Request)
-      run: ./build_pull_request.sh
-      if: github.event_name == 'pull_request'
-    - name: Build with Gradle (Push)
-      run: ./gradlew clean ktlint build
-      if: github.event_name != 'pull_request'
+    - name: Build with Modular Action
+      uses: rosariopfernandes/modular-android-action@v0.2.0
+      with:
+        for-each-module: 'assembleDebug'
+        for-all-modules: 'check'

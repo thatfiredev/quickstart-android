@@ -3,12 +3,12 @@ apply plugin: 'kotlin-android'
 check.dependsOn 'assembleDebugAndroidTest'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 30
 
     defaultConfig {
         applicationId "com.google.samples.quickstart.admobexample"
         minSdkVersion 16
-        targetSdkVersion 29
+        targetSdkVersion 30
         versionCode 1
         versionName "1.0"
         multiDexEnabled true
@@ -27,31 +27,30 @@ android {
         exclude 'LICENSE.txt'
     }
 
-    viewBinding {
-        enabled = true
-    }
+    buildFeatures {
+  viewBinding = true
+}
 }
 
 dependencies {
     implementation project(":internal:lintchecks")
     implementation project(":internal:chooserx")
-    implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'com.google.android.material:material:1.1.0'
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'com.google.android.material:material:1.2.1'
     implementation 'androidx.browser:browser:1.0.0'
 
     // [START gradle_play_config]
-    implementation 'com.google.android.gms:play-services-ads:19.1.0'
+    implementation 'com.google.android.gms:play-services-ads:19.3.0'
     // [END gradle_play_config]
 
     // For an optimal experience using AdMob, add the Firebase SDK
     // for Google Analytics. This is recommended, but not required.
-    implementation 'com.google.firebase:firebase-analytics:17.3.0'
+    implementation 'com.google.firebase:firebase-analytics:17.5.0'
 
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-    androidTestImplementation 'androidx.test:rules:1.2.0'
-    androidTestImplementation 'androidx.test:runner:1.2.0'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.71"
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+    androidTestImplementation 'androidx.test:rules:1.3.0'
+    androidTestImplementation 'androidx.test:runner:1.3.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
 }
 
 apply plugin: 'com.google.gms.google-services'

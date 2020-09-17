@@ -6,13 +6,14 @@ import com.google.android.material.snackbar.Snackbar
 import android.util.Log
 import android.view.View
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.quickstart.auth.R
 import com.google.firebase.quickstart.auth.databinding.ActivityGoogleBinding
 
@@ -51,12 +52,12 @@ class GoogleSignInActivity : BaseActivity(), View.OnClickListener {
 
         // [START initialize_auth]
         // Initialize Firebase Auth
-        auth = FirebaseAuth.getInstance()
+        auth = Firebase.auth
         // [END initialize_auth]
     }
 
     // [START on_start_check_user]
-    public override fun onStart() {
+    override fun onStart() {
         super.onStart()
         // Check if user is signed in (non-null) and update UI accordingly.
         val currentUser = auth.currentUser
@@ -65,7 +66,7 @@ class GoogleSignInActivity : BaseActivity(), View.OnClickListener {
     // [END on_start_check_user]
 
     // [START onactivityresult]
-    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
@@ -73,8 +74,9 @@ class GoogleSignInActivity : BaseActivity(), View.OnClickListener {
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
             try {
                 // Google Sign In was successful, authenticate with Firebase
-                val account = task.getResult(ApiException::class.java)
-                firebaseAuthWithGoogle(account!!)
+                val account = task.getResult(ApiException::class.java)!!
+                Log.d(TAG, "firebaseAuthWithGoogle:" + account.id)
+                firebaseAuthWithGoogle(account.idToken!!)
             } catch (e: ApiException) {
                 // Google Sign In failed, update UI appropriately
                 Log.w(TAG, "Google sign in failed", e)
@@ -87,13 +89,11 @@ class GoogleSignInActivity : BaseActivity(), View.OnClickListener {
     // [END onactivityresult]
 
     // [START auth_with_google]
-    private fun firebaseAuthWithGoogle(acct: GoogleSignInAccount) {
-        Log.d(TAG, "firebaseAuthWithGoogle:" + acct.id!!)
+    private fun firebaseAuthWithGoogle(idToken: String) {
         // [START_EXCLUDE silent]
         showProgressBar()
         // [END_EXCLUDE]
-
-        val credential = GoogleAuthProvider.getCredential(acct.idToken, null)
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
         auth.signInWithCredential(credential)
                 .addOnCompleteListener(this) { task ->
                     if (task.isSuccessful) {
@@ -104,7 +104,10 @@ class GoogleSignInActivity : BaseActivity(), View.OnClickListener {
                     } else {
                         // If sign in fails, display a message to the user.
                         Log.w(TAG, "signInWithCredential:failure", task.exception)
-                        Snackbar.make(binding.mainLayout, "Authentication Failed.", Snackbar.LENGTH_SHORT).show()
+                        // [START_EXCLUDE]
+                        val view = binding.mainLayout
+                        // [END_EXCLUDE]
+                        Snackbar.make(view, "Authentication Failed.", Snackbar.LENGTH_SHORT).show()
                         updateUI(null)
                     }
 
