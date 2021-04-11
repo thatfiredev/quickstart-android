@@ -11,6 +11,7 @@ import android.view.inputmethod.InputMethodManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.bumptech.glide.Glide;
@@ -68,29 +69,37 @@ public class RestaurantDetailFragment extends Fragment
         mRatingDialog = new RatingDialogFragment();
 
         // Get ratings
-        mViewModel.getRatingsQuery().addSnapshotListener(new EventListener<QuerySnapshot>() {
+        mViewModel.getRatingsSnapshot().observe(getViewLifecycleOwner(), new Observer<QuerySnapshot>() {
             @Override
-            public void onEvent(@Nullable QuerySnapshot querySnapshot, @Nullable FirebaseFirestoreException error) {
-                if (querySnapshot.getDocuments().isEmpty()) {
-                    mBinding.recyclerRatings.setVisibility(View.GONE);
-                    mBinding.viewEmptyRatings.setVisibility(View.VISIBLE);
-                } else {
-                    mBinding.recyclerRatings.setVisibility(View.VISIBLE);
-                    mBinding.viewEmptyRatings.setVisibility(View.GONE);
+            public void onChanged(QuerySnapshot querySnapshot) {
+                if (querySnapshot != null) {
+                    if (querySnapshot.getDocuments().isEmpty()) {
+                        mBinding.recyclerRatings.setVisibility(View.GONE);
+                        mBinding.viewEmptyRatings.setVisibility(View.VISIBLE);
+                    } else {
+                        mBinding.recyclerRatings.setVisibility(View.VISIBLE);
+                        mBinding.viewEmptyRatings.setVisibility(View.GONE);
+                    }
+                    mRatingAdapter.submitQuerySnapshot(querySnapshot);
                 }
-                mRatingAdapter.submitQuerySnapshot(querySnapshot);
             }
         });
 
-        mViewModel.getRestaurantRef().addSnapshotListener(new EventListener<DocumentSnapshot>() {
+        mViewModel.getRestaurantSnapshot().observe(getViewLifecycleOwner(), new Observer<DocumentSnapshot>() {
             @Override
-            public void onEvent(@Nullable DocumentSnapshot snapshot, @Nullable FirebaseFirestoreException e) {
+            public void onChanged(DocumentSnapshot snapshot) {
+                if (snapshot != null) {
+                    onRestaurantLoaded(snapshot.toObject(Restaurant.class));
+                }
+            }
+        });
+
+        mViewModel.getFirestoreError().observe(getViewLifecycleOwner(), new Observer<FirebaseFirestoreException>() {
+            @Override
+            public void onChanged(FirebaseFirestoreException e) {
                 if (e != null) {
                     Log.w(TAG, "restaurant:onEvent", e);
-                    return;
                 }
-
-                onRestaurantLoaded(snapshot.toObject(Restaurant.class));
             }
         });
     }

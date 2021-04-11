@@ -1,39 +1,73 @@
 package com.google.firebase.example.fireeats.java.viewmodel;
 
+import androidx.annotation.Nullable;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.example.fireeats.java.model.Rating;
 import com.google.firebase.example.fireeats.java.model.Restaurant;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Transaction;
 
 public class RestaurantDetailViewModel extends ViewModel {
 
     // TODO (rosariopfernandes): Use dependency injection here
     private final FirebaseFirestore mFirestore = FirebaseFirestore.getInstance();
-    private DocumentReference mRestaurantRef;
-    private Query mRatingsQuery;
+    private final DocumentReference mRestaurantRef;
+
+    private final ListenerRegistration restaurantListener;
+    private final ListenerRegistration ratingsListener;
+    private final MutableLiveData<DocumentSnapshot> restaurantSnapshot;
+    private final MutableLiveData<QuerySnapshot> ratingsSnapshot;
+    private final MutableLiveData<FirebaseFirestoreException> error;
 
     public RestaurantDetailViewModel(String restaurantId) {
+        restaurantSnapshot = new MutableLiveData<>();
+        ratingsSnapshot = new MutableLiveData<>();
+        error = new MutableLiveData<>();
+
         // Get reference to the restaurant
         mRestaurantRef = mFirestore.collection("restaurants").document(restaurantId);
+        restaurantListener = mRestaurantRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException e) {
+                restaurantSnapshot.postValue(value);
+                error.postValue(e);
+            }
+        });
 
-        mRatingsQuery = mRestaurantRef
+        Query mRatingsQuery = mRestaurantRef
                 .collection("ratings")
                 .orderBy("timestamp", Query.Direction.DESCENDING)
                 .limit(50);
+        ratingsListener = mRatingsQuery.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException e) {
+                ratingsSnapshot.postValue(value);
+                error.postValue(e);
+            }
+        });
     }
 
-    public Query getRatingsQuery() {
-        return mRatingsQuery;
+    public LiveData<DocumentSnapshot> getRestaurantSnapshot() {
+        return restaurantSnapshot;
     }
 
-    public DocumentReference getRestaurantRef() {
-        return mRestaurantRef;
+    public LiveData<QuerySnapshot> getRatingsSnapshot() {
+        return ratingsSnapshot;
+    }
+
+    public LiveData<FirebaseFirestoreException> getFirestoreError() {
+        return error;
     }
 
     public Task<Void> addRating(final Rating rating) {
@@ -65,5 +99,16 @@ public class RestaurantDetailViewModel extends ViewModel {
                 return null;
             }
         });
+    }
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        if (restaurantListener != null) {
+            restaurantListener.remove();
+        }
+        if (ratingsListener != null) {
+            ratingsListener.remove();
+        }
     }
 }
