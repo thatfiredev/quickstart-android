@@ -43,7 +43,7 @@ public class MainFragment extends Fragment implements
         FilterDialogFragment.FilterListener,
         RestaurantAdapter.OnRestaurantSelectedListener, View.OnClickListener {
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "MainFragment";
 
     private static final int RC_SIGN_IN = 9001;
 

@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.bumptech.glide.Glide;
@@ -59,7 +60,8 @@ public class RestaurantDetailFragment extends Fragment
 
         String restaurantId = RestaurantDetailFragmentArgs.fromBundle(getArguments()).getKeyRestaurantId();
 
-        // TODO(rosariopfernandes): Initialize ViewModel with dependency injection
+        ViewModelProvider.Factory factory = new RestaurantDetailViewModel.Factory(restaurantId);
+        mViewModel = new ViewModelProvider(this, factory).get(RestaurantDetailViewModel.class);
 
         // RecyclerView
         mRatingAdapter = new RatingAdapter();

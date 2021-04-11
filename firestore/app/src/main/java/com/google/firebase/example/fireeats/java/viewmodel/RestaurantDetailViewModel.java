@@ -1,9 +1,11 @@
 package com.google.firebase.example.fireeats.java.viewmodel;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.example.fireeats.java.model.Rating;
@@ -20,8 +22,7 @@ import com.google.firebase.firestore.Transaction;
 
 public class RestaurantDetailViewModel extends ViewModel {
 
-    // TODO (rosariopfernandes): Use dependency injection here
-    private final FirebaseFirestore mFirestore = FirebaseFirestore.getInstance();
+    private final FirebaseFirestore mFirestore;
     private final DocumentReference mRestaurantRef;
 
     private final ListenerRegistration restaurantListener;
@@ -30,7 +31,8 @@ public class RestaurantDetailViewModel extends ViewModel {
     private final MutableLiveData<QuerySnapshot> ratingsSnapshot;
     private final MutableLiveData<FirebaseFirestoreException> error;
 
-    public RestaurantDetailViewModel(String restaurantId) {
+    public RestaurantDetailViewModel(FirebaseFirestore firestore, String restaurantId) {
+        mFirestore = firestore;
         restaurantSnapshot = new MutableLiveData<>();
         ratingsSnapshot = new MutableLiveData<>();
         error = new MutableLiveData<>();
@@ -109,6 +111,26 @@ public class RestaurantDetailViewModel extends ViewModel {
         }
         if (ratingsListener != null) {
             ratingsListener.remove();
+        }
+    }
+
+    public static class Factory implements ViewModelProvider.Factory {
+        private final FirebaseFirestore mFirestore;
+        private final String mRestaurantId;
+
+        public Factory(String restaurantId) {
+            this(FirebaseFirestore.getInstance(), restaurantId);
+        }
+
+        public Factory(FirebaseFirestore firestore, String restaurantId) {
+            mFirestore = firestore;
+            mRestaurantId = restaurantId;
+        }
+
+        @NonNull
+        @Override
+        public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
+            return ((T) new RestaurantDetailViewModel(mFirestore, mRestaurantId));
         }
     }
 }

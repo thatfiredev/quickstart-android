@@ -2,10 +2,12 @@ package com.google.firebase.example.fireeats.java.viewmodel;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.example.fireeats.java.Filters;
@@ -36,24 +38,29 @@ public class MainFragmentViewModel extends ViewModel {
     private static final int LIMIT = 50;
 
     // Firestore
-    // TODO (rosariopfernandes): Use dependency injection here
-    private final FirebaseFirestore mFirestore = FirebaseFirestore.getInstance();
+    private final FirebaseFirestore mFirestore;
 
     // Get ${LIMIT} restaurants
-    private Query mQuery = mFirestore.collection("restaurants")
-            .orderBy("avgRating",Query.Direction.DESCENDING)
-            .limit(LIMIT);
+    private Query mQuery;
 
     private final MutableLiveData<QuerySnapshot> querySnapshot;
     private final MutableLiveData<FirebaseFirestoreException> error;
     private ListenerRegistration listenerRegistration;
 
-    public MainFragmentViewModel() {
+    public MainFragmentViewModel(FirebaseFirestore firestore) {
+        mFirestore = firestore;
+        mQuery = mFirestore.collection("restaurants")
+                .orderBy("avgRating",Query.Direction.DESCENDING)
+                .limit(LIMIT);
         mIsSigningIn = false;
         mFilters = Filters.getDefault();
         querySnapshot = new MutableLiveData<>();
         error = new MutableLiveData<>();
         attachSnapshotListener();
+    }
+
+    public MainFragmentViewModel() {
+        this(FirebaseFirestore.getInstance());
     }
 
     private void attachSnapshotListener() {
@@ -146,6 +153,20 @@ public class MainFragmentViewModel extends ViewModel {
         super.onCleared();
         if (listenerRegistration != null) {
             listenerRegistration.remove();
+        }
+    }
+
+    public static class Factory implements ViewModelProvider.Factory {
+        private FirebaseFirestore mFirestore;
+
+        public Factory(FirebaseFirestore firestore) {
+            mFirestore = firestore;
+        }
+
+        @NonNull
+        @Override
+        public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
+            return ((T) new MainFragmentViewModel(mFirestore));
         }
     }
 }
