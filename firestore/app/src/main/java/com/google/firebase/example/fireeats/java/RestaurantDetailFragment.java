@@ -10,14 +10,12 @@ import android.view.inputmethod.InputMethodManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.example.fireeats.R;
 import com.google.firebase.example.fireeats.databinding.FragmentRestaurantDetailBinding;
@@ -25,17 +23,14 @@ import com.google.firebase.example.fireeats.java.adapter.RatingAdapter;
 import com.google.firebase.example.fireeats.java.model.Rating;
 import com.google.firebase.example.fireeats.java.model.Restaurant;
 import com.google.firebase.example.fireeats.java.util.RestaurantUtil;
-import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.example.fireeats.java.viewmodel.RestaurantDetailViewModel;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.Transaction;
+import com.google.firebase.firestore.QuerySnapshot;
 
 public class RestaurantDetailFragment extends Fragment
-        implements EventListener<DocumentSnapshot>, RatingDialogFragment.RatingListener, View.OnClickListener {
+        implements RatingDialogFragment.RatingListener, View.OnClickListener {
 
     private static final String TAG = "RestaurantDetail";
 
@@ -43,11 +38,9 @@ public class RestaurantDetailFragment extends Fragment
     
     private RatingDialogFragment mRatingDialog;
 
-    private FirebaseFirestore mFirestore;
-    private DocumentReference mRestaurantRef;
-    private ListenerRegistration mRestaurantRegistration;
-
     private RatingAdapter mRatingAdapter;
+
+    private RestaurantDetailViewModel mViewModel;
 
     @Nullable
     @Override
@@ -65,68 +58,41 @@ public class RestaurantDetailFragment extends Fragment
 
         String restaurantId = RestaurantDetailFragmentArgs.fromBundle(getArguments()).getKeyRestaurantId();
 
-        // Initialize Firestore
-        mFirestore = FirebaseFirestore.getInstance();
-
-        // Get reference to the restaurant
-        mRestaurantRef = mFirestore.collection("restaurants").document(restaurantId);
-
-        // Get ratings
-        Query ratingsQuery = mRestaurantRef
-                .collection("ratings")
-                .orderBy("timestamp", Query.Direction.DESCENDING)
-                .limit(50);
+        // TODO(rosariopfernandes): Initialize ViewModel with dependency injection
 
         // RecyclerView
-        mRatingAdapter = new RatingAdapter(ratingsQuery) {
+        mRatingAdapter = new RatingAdapter();
+        mBinding.recyclerRatings.setLayoutManager(new LinearLayoutManager(requireContext()));
+        mBinding.recyclerRatings.setAdapter(mRatingAdapter);
+
+        mRatingDialog = new RatingDialogFragment();
+
+        // Get ratings
+        mViewModel.getRatingsQuery().addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
-            protected void onDataChanged() {
-                if (getItemCount() == 0) {
+            public void onEvent(@Nullable QuerySnapshot querySnapshot, @Nullable FirebaseFirestoreException error) {
+                if (querySnapshot.getDocuments().isEmpty()) {
                     mBinding.recyclerRatings.setVisibility(View.GONE);
                     mBinding.viewEmptyRatings.setVisibility(View.VISIBLE);
                 } else {
                     mBinding.recyclerRatings.setVisibility(View.VISIBLE);
                     mBinding.viewEmptyRatings.setVisibility(View.GONE);
                 }
+                mRatingAdapter.submitQuerySnapshot(querySnapshot);
             }
-        };
-        mBinding.recyclerRatings.setLayoutManager(new LinearLayoutManager(requireContext()));
-        mBinding.recyclerRatings.setAdapter(mRatingAdapter);
+        });
 
-        mRatingDialog = new RatingDialogFragment();
-    }
+        mViewModel.getRestaurantRef().addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot snapshot, @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    Log.w(TAG, "restaurant:onEvent", e);
+                    return;
+                }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        mRatingAdapter.startListening();
-        mRestaurantRegistration = mRestaurantRef.addSnapshotListener(this);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-
-        mRatingAdapter.stopListening();
-
-        if (mRestaurantRegistration != null) {
-            mRestaurantRegistration.remove();
-            mRestaurantRegistration = null;
-        }
-    }
-
-    /**
-     * Listener for the Restaurant document ({@link #mRestaurantRef}).
-     */
-    @Override
-    public void onEvent(DocumentSnapshot snapshot, FirebaseFirestoreException e) {
-        if (e != null) {
-            Log.w(TAG, "restaurant:onEvent", e);
-            return;
-        }
-
-        onRestaurantLoaded(snapshot.toObject(Restaurant.class));
+                onRestaurantLoaded(snapshot.toObject(Restaurant.class));
+            }
+        });
     }
 
     private void onRestaurantLoaded(Restaurant restaurant) {
@@ -153,8 +119,7 @@ public class RestaurantDetailFragment extends Fragment
 
     @Override
     public void onRating(Rating rating) {
-        // In a transaction, add the new rating and update the aggregate totals
-        addRating(mRestaurantRef, rating)
+        mViewModel.addRating(rating)
                 .addOnSuccessListener(requireActivity(), new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -176,36 +141,6 @@ public class RestaurantDetailFragment extends Fragment
                                 Snackbar.LENGTH_SHORT).show();
                     }
                 });
-    }
-
-    private Task<Void> addRating(final DocumentReference restaurantRef, final Rating rating) {
-        // Create reference for new rating, for use inside the transaction
-        final DocumentReference ratingRef = restaurantRef.collection("ratings").document();
-
-        // In a transaction, add the new rating and update the aggregate totals
-        return mFirestore.runTransaction(new Transaction.Function<Void>() {
-            @Override
-            public Void apply(Transaction transaction) throws FirebaseFirestoreException {
-                Restaurant restaurant = transaction.get(restaurantRef).toObject(Restaurant.class);
-
-                // Compute new number of ratings
-                int newNumRatings = restaurant.getNumRatings() + 1;
-
-                // Compute new average rating
-                double oldRatingTotal = restaurant.getAvgRating() * restaurant.getNumRatings();
-                double newAvgRating = (oldRatingTotal + rating.getRating()) / newNumRatings;
-
-                // Set new restaurant info
-                restaurant.setNumRatings(newNumRatings);
-                restaurant.setAvgRating(newAvgRating);
-
-                // Commit to Firestore
-                transaction.set(restaurantRef, restaurant);
-                transaction.set(ratingRef, rating);
-
-                return null;
-            }
-        });
     }
 
     private void hideKeyboard() {
