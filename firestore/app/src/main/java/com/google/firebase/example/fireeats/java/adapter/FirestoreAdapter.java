@@ -5,9 +5,6 @@ import android.util.Log;
 
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -21,31 +18,15 @@ import java.util.ArrayList;
  * many times as the user scrolls.
  */
 public abstract class FirestoreAdapter<VH extends RecyclerView.ViewHolder>
-        extends RecyclerView.Adapter<VH>
-        implements EventListener<QuerySnapshot> {
+        extends RecyclerView.Adapter<VH> {
 
     private static final String TAG = "FirestoreAdapter";
 
-    private Query mQuery;
-    private ListenerRegistration mRegistration;
+    private final ArrayList<DocumentSnapshot> mSnapshots = new ArrayList<>();
 
-    private ArrayList<DocumentSnapshot> mSnapshots = new ArrayList<>();
-
-    public FirestoreAdapter(Query query) {
-        mQuery = query;
-    }
-
-    @Override
-    public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
-        if (e != null) {
-            Log.w(TAG, "onEvent:error", e);
-            onError(e);
-            return;
-        }
-
-        // Dispatch the event
-        Log.d(TAG, "onEvent:numChanges:" + documentSnapshots.getDocumentChanges().size());
-        for (DocumentChange change : documentSnapshots.getDocumentChanges()) {
+    public void submitQuerySnapshot(QuerySnapshot querySnapshot) {
+        Log.d(TAG, "onEvent:numChanges:" + querySnapshot.getDocumentChanges().size());
+        for (DocumentChange change : querySnapshot.getDocumentChanges()) {
             switch (change.getType()) {
                 case ADDED:
                     onDocumentAdded(change);
@@ -58,37 +39,6 @@ public abstract class FirestoreAdapter<VH extends RecyclerView.ViewHolder>
                     break;
             }
         }
-
-        onDataChanged();
-    }
-
-    public void startListening() {
-        if (mQuery != null && mRegistration == null) {
-            mRegistration = mQuery.addSnapshotListener(this);
-        }
-    }
-
-    public void stopListening() {
-        if (mRegistration != null) {
-            mRegistration.remove();
-            mRegistration = null;
-        }
-
-        mSnapshots.clear();
-        notifyDataSetChanged();
-    }
-
-    public void setQuery(Query query) {
-        // Stop listening
-        stopListening();
-
-        // Clear existing data
-        mSnapshots.clear();
-        notifyDataSetChanged();
-
-        // Listen to new query
-        mQuery = query;
-        startListening();
     }
 
     @Override
@@ -122,10 +72,4 @@ public abstract class FirestoreAdapter<VH extends RecyclerView.ViewHolder>
         mSnapshots.remove(change.getOldIndex());
         notifyItemRemoved(change.getOldIndex());
     }
-
-    protected void onError(FirebaseFirestoreException e) {
-        Log.w(TAG, "onError", e);
-    };
-
-    protected void onDataChanged() {}
 }

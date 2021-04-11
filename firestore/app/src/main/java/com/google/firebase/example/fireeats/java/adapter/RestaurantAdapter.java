@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -13,7 +14,6 @@ import com.google.firebase.example.fireeats.databinding.ItemRestaurantBinding;
 import com.google.firebase.example.fireeats.java.model.Restaurant;
 import com.google.firebase.example.fireeats.java.util.RestaurantUtil;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.Query;
 
 /**
  * RecyclerView adapter for a list of Restaurants.
@@ -22,19 +22,19 @@ public class RestaurantAdapter extends FirestoreAdapter<RestaurantAdapter.ViewHo
 
     public interface OnRestaurantSelectedListener {
 
-        void onRestaurantSelected(DocumentSnapshot restaurant);
+        void onRestaurantSelected(String restaurantId);
 
     }
 
-    private OnRestaurantSelectedListener mListener;
+    private final OnRestaurantSelectedListener mListener;
 
-    public RestaurantAdapter(Query query, OnRestaurantSelectedListener listener) {
-        super(query);
+    public RestaurantAdapter(OnRestaurantSelectedListener listener) {
         mListener = listener;
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    @NonNull
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return new ViewHolder(ItemRestaurantBinding.inflate(
                 LayoutInflater.from(parent.getContext()), parent, false));
     }
@@ -46,15 +46,11 @@ public class RestaurantAdapter extends FirestoreAdapter<RestaurantAdapter.ViewHo
 
     static class ViewHolder extends RecyclerView.ViewHolder {
 
-        private ItemRestaurantBinding binding;
+        private final ItemRestaurantBinding binding;
 
         public ViewHolder(ItemRestaurantBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
-        }
-
-        public ViewHolder(View itemView) {
-            super(itemView);
         }
 
         public void bind(final DocumentSnapshot snapshot,
@@ -81,7 +77,7 @@ public class RestaurantAdapter extends FirestoreAdapter<RestaurantAdapter.ViewHo
                 @Override
                 public void onClick(View view) {
                     if (listener != null) {
-                        listener.onRestaurantSelected(snapshot);
+                        listener.onRestaurantSelected(snapshot.getId());
                     }
                 }
             });

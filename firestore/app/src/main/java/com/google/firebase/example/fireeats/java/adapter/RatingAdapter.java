@@ -3,11 +3,11 @@ package com.google.firebase.example.fireeats.java.adapter;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.example.fireeats.databinding.ItemRatingBinding;
 import com.google.firebase.example.fireeats.java.model.Rating;
-import com.google.firebase.firestore.Query;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -17,12 +17,9 @@ import java.util.Locale;
  */
 public class RatingAdapter extends FirestoreAdapter<RatingAdapter.ViewHolder> {
 
-    public RatingAdapter(Query query) {
-        super(query);
-    }
-
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    @NonNull
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return new ViewHolder(ItemRatingBinding.inflate(
                 LayoutInflater.from(parent.getContext()), parent, false));
     }
@@ -37,7 +34,7 @@ public class RatingAdapter extends FirestoreAdapter<RatingAdapter.ViewHolder> {
         private static final SimpleDateFormat FORMAT  = new SimpleDateFormat(
                 "MM/dd/yyyy", Locale.US);
 
-        private ItemRatingBinding binding;
+        private final ItemRatingBinding binding;
 
         public ViewHolder(ItemRatingBinding binding) {
             super(binding.getRoot());
