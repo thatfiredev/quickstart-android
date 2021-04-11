@@ -7,6 +7,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.navigation.Navigation;
 
 import com.google.firebase.example.fireeats.R;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class  MainActivity extends AppCompatActivity {
 
@@ -18,5 +19,8 @@ public class  MainActivity extends AppCompatActivity {
 
         Navigation.findNavController(this, R.id.nav_host_fragment)
                 .setGraph(R.navigation.nav_graph_java);
+
+        // Enable Firestore logging
+        FirebaseFirestore.setLoggingEnabled(true);
     }
 }

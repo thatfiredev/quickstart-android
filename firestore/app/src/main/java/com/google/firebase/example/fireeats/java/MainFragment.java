@@ -18,6 +18,7 @@ import androidx.annotation.StringRes;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.text.HtmlCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -33,8 +34,6 @@ import com.google.firebase.example.fireeats.R;
 import com.google.firebase.example.fireeats.databinding.FragmentMainBinding;
 import com.google.firebase.example.fireeats.java.adapter.RestaurantAdapter;
 import com.google.firebase.example.fireeats.java.viewmodel.MainFragmentViewModel;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -71,14 +70,11 @@ public class MainFragment extends Fragment implements
         // View model
         mViewModel = new ViewModelProvider(this).get(MainFragmentViewModel.class);
 
-        // Enable Firestore logging
-        FirebaseFirestore.setLoggingEnabled(true);
-
         mAdapter = new RestaurantAdapter(this);
 
-        mViewModel.getQuery().addSnapshotListener(new EventListener<QuerySnapshot>() {
+        mViewModel.getQuerySnapshot().observe(getViewLifecycleOwner(), new Observer<QuerySnapshot>() {
             @Override
-            public void onEvent(@Nullable QuerySnapshot querySnapshot, @Nullable FirebaseFirestoreException error) {
+            public void onChanged(QuerySnapshot querySnapshot) {
                 if (querySnapshot != null) {
                     mAdapter.submitQuerySnapshot(querySnapshot);
 
@@ -91,7 +87,12 @@ public class MainFragment extends Fragment implements
                         mBinding.viewEmpty.setVisibility(View.GONE);
                     }
                 }
+            }
+        });
 
+        mViewModel.getFirestoreError().observe(getViewLifecycleOwner(), new Observer<FirebaseFirestoreException>() {
+            @Override
+            public void onChanged(FirebaseFirestoreException error) {
                 if (error != null) {
                     Snackbar.make(mBinding.getRoot(), "Error: check logs for info.",
                             Snackbar.LENGTH_LONG).show();

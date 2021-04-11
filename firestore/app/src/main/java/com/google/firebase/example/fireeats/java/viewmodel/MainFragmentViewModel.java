@@ -2,6 +2,9 @@ package com.google.firebase.example.fireeats.java.viewmodel;
 
 import android.content.Context;
 
+import androidx.annotation.Nullable;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.google.android.gms.tasks.Task;
@@ -11,14 +14,18 @@ import com.google.firebase.example.fireeats.java.model.Restaurant;
 import com.google.firebase.example.fireeats.java.util.RatingUtil;
 import com.google.firebase.example.fireeats.java.util.RestaurantUtil;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
 
 import java.util.List;
 
 /**
- * ViewModel for {@link com.google.firebase.example.fireeats.java.MainActivity}.
+ * ViewModel for {@link com.google.firebase.example.fireeats.java.MainFragment}.
  */
 
 public class MainFragmentViewModel extends ViewModel {
@@ -37,14 +44,35 @@ public class MainFragmentViewModel extends ViewModel {
             .orderBy("avgRating",Query.Direction.DESCENDING)
             .limit(LIMIT);
 
+    private final MutableLiveData<QuerySnapshot> querySnapshot;
+    private final MutableLiveData<FirebaseFirestoreException> error;
+    private ListenerRegistration listenerRegistration;
 
     public MainFragmentViewModel() {
         mIsSigningIn = false;
         mFilters = Filters.getDefault();
+        querySnapshot = new MutableLiveData<>();
+        error = new MutableLiveData<>();
+        attachSnapshotListener();
     }
 
-    // TODO (rosariopfernandes): handle the query change - maybe use livedata?
-    public Query getQuery() { return mQuery; }
+    private void attachSnapshotListener() {
+        listenerRegistration = mQuery.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException e) {
+                querySnapshot.postValue(value);
+                error.postValue(e);
+            }
+        });
+    }
+
+    public LiveData<QuerySnapshot> getQuerySnapshot() {
+        return querySnapshot;
+    }
+
+    public LiveData<FirebaseFirestoreException> getFirestoreError() {
+        return error;
+    }
 
     public void addFiltersToQuery(Filters filters) {
         // Construct query basic query
@@ -71,6 +99,8 @@ public class MainFragmentViewModel extends ViewModel {
         }
 
         this.mQuery = query.limit(LIMIT);
+
+        attachSnapshotListener();
     }
 
     public Task<Void> addRandomRestaurants(Context context) {
@@ -109,5 +139,13 @@ public class MainFragmentViewModel extends ViewModel {
 
     public void setFilters(Filters mFilters) {
         this.mFilters = mFilters;
+    }
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        if (listenerRegistration != null) {
+            listenerRegistration.remove();
+        }
     }
 }
