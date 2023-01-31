@@ -27,6 +27,7 @@ import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.ktx.snapshots
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 
@@ -59,6 +60,8 @@ class RestaurantDetailFragment : Fragment(),
 
         // Get reference to the restaurant
         restaurantRef = firestore.collection("restaurants").document(restaurantId)
+
+        restaurantRef.snapshots()
 
         // Get ratings
         val ratingsQuery = restaurantRef

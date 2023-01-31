@@ -31,17 +31,27 @@ import com.google.firebase.example.fireeats.kotlin.model.Restaurant
 import com.google.firebase.example.fireeats.kotlin.util.RatingUtil
 import com.google.firebase.example.fireeats.kotlin.util.RestaurantUtil
 import com.google.firebase.example.fireeats.kotlin.viewmodel.MainActivityViewModel
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.ktx.snapshots
+import com.google.firebase.firestore.ktx.toObject
+import com.google.firebase.firestore.ktx.toObjects
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.tasks.await
 
 class MainFragment : Fragment(),
-        FilterDialogFragment.FilterListener,
-        RestaurantAdapter.OnRestaurantSelectedListener,
-        MenuProvider {
+    FilterDialogFragment.FilterListener,
+    RestaurantAdapter.OnRestaurantSelectedListener,
+    MenuProvider {
 
     lateinit var firestore: FirebaseFirestore
     lateinit var query: Query
@@ -71,8 +81,8 @@ class MainFragment : Fragment(),
 
         // Get ${LIMIT} restaurants
         query = firestore.collection("restaurants")
-                .orderBy("avgRating", Query.Direction.DESCENDING)
-                .limit(LIMIT.toLong())
+            .orderBy("avgRating", Query.Direction.DESCENDING)
+            .limit(LIMIT.toLong())
 
         // RecyclerView
         adapter = object : RestaurantAdapter(query, this@MainFragment) {
@@ -89,8 +99,10 @@ class MainFragment : Fragment(),
 
             override fun onError(e: FirebaseFirestoreException) {
                 // Show a snackbar on errors
-                Snackbar.make(binding.root,
-                        "Error: check logs for info.", Snackbar.LENGTH_LONG).show()
+                Snackbar.make(
+                    binding.root,
+                    "Error: check logs for info.", Snackbar.LENGTH_LONG
+                ).show()
             }
         }
 
@@ -214,8 +226,10 @@ class MainFragment : Fragment(),
         adapter.setQuery(query)
 
         // Set header
-        binding.textCurrentSearch.text = HtmlCompat.fromHtml(filters.getSearchDescription(requireContext()),
-                HtmlCompat.FROM_HTML_MODE_LEGACY)
+        binding.textCurrentSearch.text = HtmlCompat.fromHtml(
+            filters.getSearchDescription(requireContext()),
+            HtmlCompat.FROM_HTML_MODE_LEGACY
+        )
         binding.textCurrentSortBy.text = filters.getOrderDescription(requireContext())
 
         // Save filters
@@ -230,12 +244,12 @@ class MainFragment : Fragment(),
         // Sign in with FirebaseUI
         val signInLauncher = requireActivity().registerForActivityResult(
             FirebaseAuthUIActivityResultContract()
-        ) { result -> this.onSignInResult(result)}
+        ) { result -> this.onSignInResult(result) }
 
         val intent = AuthUI.getInstance().createSignInIntentBuilder()
-                .setAvailableProviders(listOf(AuthUI.IdpConfig.EmailBuilder().build()))
-                .setIsSmartLockEnabled(false)
-                .build()
+            .setAvailableProviders(listOf(AuthUI.IdpConfig.EmailBuilder().build()))
+            .setIsSmartLockEnabled(false)
+            .build()
 
         signInLauncher.launch(intent)
         viewModel.isSigningIn = true
@@ -272,11 +286,11 @@ class MainFragment : Fragment(),
 
     private fun showSignInErrorDialog(@StringRes message: Int) {
         val dialog = AlertDialog.Builder(requireContext())
-                .setTitle(R.string.title_sign_in_error)
-                .setMessage(message)
-                .setCancelable(false)
-                .setPositiveButton(R.string.option_retry) { _, _ -> startSignIn() }
-                .setNegativeButton(R.string.option_exit) { _, _ -> requireActivity().finish() }.create()
+            .setTitle(R.string.title_sign_in_error)
+            .setMessage(message)
+            .setCancelable(false)
+            .setPositiveButton(R.string.option_retry) { _, _ -> startSignIn() }
+            .setNegativeButton(R.string.option_exit) { _, _ -> requireActivity().finish() }.create()
 
         dialog.show()
     }
